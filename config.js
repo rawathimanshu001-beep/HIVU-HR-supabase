@@ -8,7 +8,7 @@
  * STEP 4: Save and deploy!
  */
 
-const HIVU_CONFIG = {
+window.HIVU_CONFIG = {
 
   // ── SUPABASE CREDENTIALS ──────────────────────────────────
   // Get these from: Supabase Dashboard → Settings → API
@@ -42,3 +42,5 @@ const HIVU_CONFIG = {
   branches: []
 
 };
+
+console.log("✓ HIVU_CONFIG loaded:", window.HIVU_CONFIG);
