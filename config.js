@@ -13,7 +13,7 @@ const HIVU_CONFIG = {
   // ── SUPABASE CREDENTIALS ──────────────────────────────────
   // Get these from: Supabase Dashboard → Settings → API
   supabaseUrl: "https://kaiiffxgnpjsgswuhukj.supabase.co",
-  supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImthaWlmZnhnbnBqc2dzd3VodWtqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyNzA5MDcsImV4cCI6MjA5OTg0NjkwN30.E5PArYijB5aJ8eBNQ_tr0gUPpa4oAM72VmHCjqWoFw0",
+  supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImthaWlmZngnbnBqc2dzd3VodWtqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyNzA5MDcsImV4cCI6MjA5OTg0NjkwN30.E5PArYijB5aJ8eBNQ_tr0gUPpa4oAM72VmHCjqWoFw0",
 
   // ── COMPANY DETAILS ───────────────────────────────────────
   company: {
@@ -42,32 +42,3 @@ const HIVU_CONFIG = {
   branches: []
 
 };
-
-// Initialize Supabase with error handling
-let supabase = null;
-
-function initSupabase() {
-  if (typeof HIVU_CONFIG === 'undefined' || !HIVU_CONFIG.supabaseUrl || !HIVU_CONFIG.supabaseKey) {
-    console.error("Supabase credentials not configured");
-    return null;
-  }
-  
-  try {
-    supabase = window.supabase.createClient(
-      HIVU_CONFIG.supabaseUrl,
-      HIVU_CONFIG.supabaseKey
-    );
-    console.log("✅ Supabase initialized successfully");
-    return supabase;
-  } catch (error) {
-    console.error("Supabase initialization error:", error);
-    return null;
-  }
-}
-
-// Auto-initialize when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initSupabase);
-} else {
-  initSupabase();
-}
