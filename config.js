@@ -12,7 +12,7 @@ const HIVU_CONFIG = {
 
   // ── SUPABASE CREDENTIALS ──────────────────────────────────
   // Get these from: Supabase Dashboard → Settings → API
-  supabaseUrl: "https://kaiiffxgnpjsgswuhukj.supabase.co",      // ← Replace with your Project URL
+  supabaseUrl: "https://kaiiffxgnpjsgswuhukj.supabase.co/rest/v1/",      // ← Replace with your Project URL
   supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImthaWlmZnhnbnBqc2dzd3VodWtqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyNzA5MDcsImV4cCI6MjA5OTg0NjkwN30.E5PArYijB5aJ8eBNQ_tr0gUPpa4oAM72VmHCjqWoFw0",
 
   // ── COMPANY DETAILS ───────────────────────────────────────
