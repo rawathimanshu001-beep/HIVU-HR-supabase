@@ -17,7 +17,7 @@ const HIVU_CONFIG = {
 
   // ── COMPANY DETAILS ───────────────────────────────────────
   company: {
-    name: "Your Company Pvt. Ltd.",
+    name: "ABC Pvt. Ltd.",
     city: "New Delhi",
     logo: "data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 120 120%22%3E%3Ccircle cx=%2260%22 cy=%2220%22 r=%2212%22 fill=%22%2300D4FF%22/%3E%3Ctext x=%2210%22 y=%2295%22 font-family=%22Arial%22 font-weight=%22900%22 font-size=%2280%22 fill=%22%230066FF%22%3EiliVU%3C/text%3E%3C/svg%3E"
   },
@@ -29,8 +29,8 @@ const HIVU_CONFIG = {
   // 3. Long-press the building
   // 4. Copy coordinates
   office: {
-    lat: 28.5838,       // ← Paste your latitude
-    lng: 77.0543,       // ← Paste your longitude
+    lat: 28.589954,       // ← Paste your latitude
+    lng: 77.031847,       // ← Paste your longitude
     name: "Head Office",
     radius: 100         // Metres (200 is standard)
   },
