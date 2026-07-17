@@ -13,7 +13,7 @@ const HIVU_CONFIG = {
   // ── SUPABASE CREDENTIALS ──────────────────────────────────
   // Get these from: Supabase Dashboard → Settings → API
   supabaseUrl: "https://kaiiffxgnpjsgswuhukj.supabase.co",      // ← Replace with your Project URL
-  supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImthaWlmZnhnbnBqc2dzd3VodWtqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyNzA5MDcsImV4cCI6MjA5OTg0NjkwN30.E5PArYijB5aJ8eBNQ_tr0gUPpa4oAM72VmHCjqWoFw0",                                  // ← Replace with your Anon Key
+  supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImthaWlmZnhnbnBqc2dzd3VodWtqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc4NDI3MDkwNywiZXhwIjoyMDk5ODQ2OTA3fQ.RiJSqVGXdyePmvbZNFxQ_MJOnEIRMf97GnU4xqzYct4",                                  // ← Replace with your Anon Key
 
   // ── COMPANY DETAILS ───────────────────────────────────────
   company: {
