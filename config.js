@@ -23,11 +23,6 @@ const HIVU_CONFIG = {
   },
 
   // ── OFFICE GPS LOCATION ───────────────────────────────────
-  // HOW TO GET:
-  // 1. Open Google Maps
-  // 2. Go to your office
-  // 3. Long-press the building
-  // 4. Copy coordinates
   office: {
     lat: 28.589954,
     lng: 77.031847,
@@ -47,3 +42,32 @@ const HIVU_CONFIG = {
   branches: []
 
 };
+
+// Initialize Supabase with error handling
+let supabase = null;
+
+function initSupabase() {
+  if (typeof HIVU_CONFIG === 'undefined' || !HIVU_CONFIG.supabaseUrl || !HIVU_CONFIG.supabaseKey) {
+    console.error("Supabase credentials not configured");
+    return null;
+  }
+  
+  try {
+    supabase = window.supabase.createClient(
+      HIVU_CONFIG.supabaseUrl,
+      HIVU_CONFIG.supabaseKey
+    );
+    console.log("✅ Supabase initialized successfully");
+    return supabase;
+  } catch (error) {
+    console.error("Supabase initialization error:", error);
+    return null;
+  }
+}
+
+// Auto-initialize when DOM is ready
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initSupabase);
+} else {
+  initSupabase();
+}
