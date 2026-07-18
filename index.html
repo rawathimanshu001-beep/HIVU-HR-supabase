@@ -2109,7 +2109,6 @@ async function handleMissingClockOut() {
       .select('id')
       .eq('emp_id', empId)
       .eq('date', yesterday)
-      .is('clock_out_time', null)
       .single();
 
     if (data) {
