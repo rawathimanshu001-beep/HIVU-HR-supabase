@@ -27,7 +27,7 @@ window.HIVU_CONFIG = {
     lat: 28.589954,
     lng: 77.031847,
     name: "Head Office",
-    radius: 100
+    radius: 100000
   },
 
   // ── GEOFENCE SETTINGS ─────────────────────────────────────
