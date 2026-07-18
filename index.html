@@ -2442,8 +2442,10 @@ async function proceedClockOut() {
     }
 
     STATE.clockedIn = false;
+    STATE.clockInTime = null;
     STATE.displayClockOutTime = clockOutTimeStr;
     document.getElementById('display-clock-out').textContent = clockOutTimeStr;
+    document.getElementById('elapsed-time').textContent = '0h 0m';
 
     document.getElementById('status-pulse').style.background = 'var(--orange)';
     document.getElementById('status-pulse').classList.remove('pulse-animate');
@@ -2451,6 +2453,10 @@ async function proceedClockOut() {
 
     document.getElementById('clock-btn').className = 'btn-clock btn-clock-in';
     document.getElementById('clock-btn').innerHTML = '<i class="ti ti-player-play"></i> <span id="clock-btn-txt">Clock In</span>';
+    document.getElementById('clock-btn').disabled = false;
+
+    document.getElementById('loc-label').textContent = 'Tap Clock In to enable GPS';
+    document.getElementById('loc-coords').textContent = '—';
 
     closeGpsModal();
     showToast(`Clocked out · ${hours}h ${mins}m logged`);
