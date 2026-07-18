@@ -1978,6 +1978,7 @@ async function loadUserData() {
     loadAttendanceData();
     loadCelebrations();
     await restoreClockState();
+    handleMissingClockOut();
   } catch (err) {
     console.error(err);
   }
@@ -1985,7 +1986,8 @@ async function loadUserData() {
 
 async function restoreClockState() {
   const empId = localStorage.getItem('auth_emp_id');
-  const today = new Date().toISOString().split('T')[0];
+  const now = new Date();
+  const today = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
 
   try {
     const { data, error } = await supabaseClient
@@ -2031,6 +2033,37 @@ async function restoreClockState() {
     }
   } catch (err) {
     console.log('No active clock-in session');
+  }
+}
+
+async function handleMissingClockOut() {
+  const empId = localStorage.getItem('auth_emp_id');
+  const now = new Date();
+  const yesterday = new Date(now.getTime() - 86400000 - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+
+  try {
+    const { data } = await supabaseClient
+      .from('attendance_logs')
+      .select('id')
+      .eq('emp_id', empId)
+      .eq('date', yesterday)
+      .is('clock_out_time', null)
+      .single();
+
+    if (data) {
+      const { error } = await supabaseClient
+        .from('attendance_logs')
+        .update({
+          clock_out_time: 'missing',
+          status: 'Missing Clock Out'
+        })
+        .eq('id', data.id);
+
+      if (error) throw error;
+      console.log('Auto clock-out at midnight recorded');
+    }
+  } catch (err) {
+    console.log('No missing clock-out to handle');
   }
 }
 
@@ -2346,13 +2379,14 @@ async function confirmClock() {
   const now = new Date();
   const empId = localStorage.getItem('auth_emp_id');
   const clockInTimeStr = now.toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:true});
+  const localDate = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
 
   try {
     const { error } = await supabaseClient
       .from('attendance_logs')
       .insert({
         emp_id: empId,
-        date: now.toISOString().split('T')[0],
+        date: localDate,
         clock_in_time: clockInTimeStr,
         clock_in_lat: STATE.clockInCoords.lat,
         clock_in_lng: STATE.clockInCoords.lng,
@@ -2415,9 +2449,10 @@ async function proceedClockOut() {
   const hours = Math.floor((Date.now() - STATE.clockInTime) / 3600000);
   const mins = Math.floor(((Date.now() - STATE.clockInTime) % 3600000) / 60000);
   const clockOutTimeStr = now.toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:true});
+  const localDate = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
 
   try {
-    const today = now.toISOString().split('T')[0];
+    const today = localDate;
     const { data: existing } = await supabaseClient
       .from('attendance_logs')
       .select('id')
@@ -2454,6 +2489,9 @@ async function proceedClockOut() {
     document.getElementById('clock-btn').className = 'btn-clock btn-clock-in';
     document.getElementById('clock-btn').innerHTML = '<i class="ti ti-player-play"></i> <span id="clock-btn-txt">Clock In</span>';
     document.getElementById('clock-btn').disabled = false;
+
+    document.getElementById('clock-confirm-btn').textContent = 'Confirm Clock In';
+    document.getElementById('clock-confirm-btn').onclick = confirmClock;
 
     document.getElementById('loc-label').textContent = 'Tap Clock In to enable GPS';
     document.getElementById('loc-coords').textContent = '—';
