@@ -261,43 +261,58 @@ input, select, textarea {
 }
 
 .celebrate-card {
-  background: linear-gradient(135deg, rgba(0, 102, 255, 0.1), rgba(0, 212, 255, 0.05));
-  border: 1px solid rgba(0, 102, 255, 0.2);
-  border-radius: var(--radius);
-  padding: 12px;
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  overflow-y: hidden;
   margin-bottom: 10px;
+  scroll-behavior: smooth;
+}
+
+.celebrate-card::-webkit-scrollbar {
+  display: none;
 }
 
 .celebrate-item {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-
-.celebrate-item:last-child {
-  margin-bottom: 0;
+  gap: 8px;
+  flex-shrink: 0;
+  width: 100px;
+  text-align: center;
 }
 
 .celebrate-emoji {
-  font-size: 20px;
-  flex-shrink: 0;
+  font-size: 40px;
 }
 
-.celebrate-text {
-  flex: 1;
+.celebrate-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+  border: 2px solid rgba(0, 212, 255, 0.3);
 }
 
 .celebrate-name {
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 12px;
+  font-weight: 700;
   color: var(--text);
+  line-height: 1.2;
 }
 
 .celebrate-sub {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--muted);
-  margin-top: 1px;
+  line-height: 1.2;
 }
 
 .clock-card {
@@ -984,6 +999,11 @@ input, select, textarea {
   border-bottom: 1px solid rgba(0, 102, 255, 0.1);
 }
 
+.avatar-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
 .avatar {
   width: 56px;
   height: 56px;
@@ -1000,6 +1020,41 @@ input, select, textarea {
   overflow: hidden;
   background-size: cover;
   background-position: center;
+}
+
+.avatar-overlay {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.avatar-overlay:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.avatar-change-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--primary-light);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  cursor: pointer;
+  font-size: 16px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.avatar-overlay:hover .avatar-change-btn {
+  opacity: 1;
 }
 
 .profile-name {
@@ -1502,15 +1557,6 @@ input, select, textarea {
         </div>
       </div>
 
-      <!-- BIRTHDAY + WORK ANNIVERSARY SECTION -->
-      <div class="section">
-        <div class="section-title">Today's celebrations</div>
-        <div class="celebrate-card" id="celebrate-container" style="display:none">
-          <div id="celebrate-items"></div>
-        </div>
-        <div id="no-celebrate" style="text-align:center;color:var(--muted);font-size:12px;padding:12px">No celebrations today</div>
-      </div>
-
       <!-- CLOCK CARD -->
       <div class="clock-card">
         <div class="clock-top">
@@ -1544,6 +1590,14 @@ input, select, textarea {
             <i class="ti ti-player-play"></i>
             <span id="clock-btn-txt">Clock In</span>
           </button>
+        </div>
+      </div>
+
+      <!-- UPCOMING CELEBRATIONS (NEXT 30 DAYS) -->
+      <div class="section">
+        <div class="section-title">Upcoming celebrations</div>
+        <div class="celebrate-card" id="celebrate-container">
+          <div id="celebrate-items"></div>
         </div>
       </div>
 
@@ -1709,7 +1763,15 @@ input, select, textarea {
     <!-- PROFILE PAGE -->
     <div class="page" id="pg-profile">
       <div class="profile-hero">
-        <div class="avatar" id="profile-avatar">—</div>
+        <div class="avatar-wrapper">
+          <div class="avatar" id="profile-avatar">—</div>
+          <div class="avatar-overlay">
+            <input type="file" id="avatar-input" accept="image/*" style="display:none" onchange="uploadProfilePhoto(event)">
+            <button class="avatar-change-btn" onclick="document.getElementById('avatar-input').click()">
+              <i class="ti ti-camera"></i>
+            </button>
+          </div>
+        </div>
         <div>
           <div class="profile-name" id="profile-name">—</div>
           <div class="profile-role" id="profile-role">—</div>
@@ -2083,7 +2145,14 @@ function updateUIWithUserData(user) {
     `${user.designation || '—'} · ${user.department || '—'}`;
   document.getElementById('profile-emp-id').textContent = user.emp_id;
   document.getElementById('profile-email').textContent = user.email || '—';
-  document.getElementById('profile-avatar').textContent = (user.name || '?').split(' ').map(n => n[0]).join('');
+
+  const avatarEl = document.getElementById('profile-avatar');
+  if (user.avatar) {
+    avatarEl.style.backgroundImage = `url(${user.avatar})`;
+    avatarEl.textContent = '';
+  } else {
+    avatarEl.textContent = (user.name || '?').split(' ').map(n => n[0]).join('');
+  }
 
   if (user.work_anniversary) {
     document.getElementById('profile-anni').textContent = new Date(user.work_anniversary).toLocaleDateString('en-IN', {year:'numeric', month:'short', day:'numeric'});
@@ -2095,31 +2164,67 @@ function updateUIWithUserData(user) {
 }
 
 async function loadCelebrations() {
-  const today = new Date().toISOString().split('T')[0];
+  const today = new Date();
+  const next30Days = new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000);
 
   try {
     const { data } = await supabaseClient
       .from('employees')
-      .select('name, dob, work_anniversary')
-      .or(`dob.eq.${today},work_anniversary.eq.${today}`);
+      .select('emp_id, name, dob, work_anniversary, avatar');
 
     if (data && data.length > 0) {
-      const html = data.map(emp => {
-        const isBday = emp.dob && emp.dob.endsWith(today.slice(5));
-        return `
-          <div class="celebrate-item">
-            <div class="celebrate-emoji">${isBday ? '🎂' : '🎉'}</div>
-            <div class="celebrate-text">
-              <div class="celebrate-name">${emp.name}'s ${isBday ? 'birthday' : 'work anniversary'}</div>
-              <div class="celebrate-sub">Today</div>
-            </div>
-          </div>
-        `;
-      }).join('');
+      const celebrations = [];
 
-      document.getElementById('celebrate-container').style.display = 'block';
-      document.getElementById('celebrate-items').innerHTML = html;
-      document.getElementById('no-celebrate').style.display = 'none';
+      data.forEach(emp => {
+        if (emp.dob) {
+          const bdayMonth = emp.dob.slice(5, 7);
+          const bdayDay = emp.dob.slice(8, 10);
+          const currentMonthDay = `${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+          if (bdayMonth + '-' + bdayDay >= currentMonthDay) {
+            celebrations.push({
+              name: emp.name,
+              type: 'birthday',
+              date: bdayMonth + '-' + bdayDay,
+              avatar: emp.avatar,
+              initials: (emp.name || '?').split(' ').map(n => n[0]).join('')
+            });
+          }
+        }
+
+        if (emp.work_anniversary) {
+          const annivMonth = emp.work_anniversary.slice(5, 7);
+          const annivDay = emp.work_anniversary.slice(8, 10);
+          const currentMonthDay = `${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+
+          if (annivMonth + '-' + annivDay >= currentMonthDay) {
+            celebrations.push({
+              name: emp.name,
+              type: 'work_anniversary',
+              date: annivMonth + '-' + annivDay,
+              avatar: emp.avatar,
+              initials: (emp.name || '?').split(' ').map(n => n[0]).join('')
+            });
+          }
+        }
+      });
+
+      celebrations.sort((a, b) => a.date.localeCompare(b.date));
+
+      if (celebrations.length > 0) {
+        const html = celebrations.map(cel => {
+          const isBday = cel.type === 'birthday';
+          return `
+            <div class="celebrate-item">
+              <div class="celebrate-avatar">${cel.initials}</div>
+              <div class="celebrate-name">${cel.name}</div>
+              <div class="celebrate-sub">${isBday ? '🎂 Birthday' : '🎉 Anniv.'}</div>
+            </div>
+          `;
+        }).join('');
+
+        document.getElementById('celebrate-items').innerHTML = html;
+      }
     }
   } catch (err) {
     console.error(err);
@@ -2480,7 +2585,7 @@ async function proceedClockOut() {
     STATE.clockInTime = null;
     STATE.displayClockOutTime = clockOutTimeStr;
     document.getElementById('display-clock-out').textContent = clockOutTimeStr;
-    document.getElementById('elapsed-time').textContent = '0h 0m';
+    document.getElementById('elapsed-time').textContent = `${hours}h ${mins}m`;
 
     document.getElementById('status-pulse').style.background = 'var(--orange)';
     document.getElementById('status-pulse').classList.remove('pulse-animate');
@@ -2591,6 +2696,40 @@ function showToast(msg) {
   toast.textContent = msg;
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 3000);
+}
+
+async function uploadProfilePhoto(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  const empId = localStorage.getItem('auth_emp_id');
+  if (!empId) {
+    showToast('Error: Not logged in');
+    return;
+  }
+
+  try {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      const photoUrl = e.target.result;
+
+      const { error: updateError } = await supabaseClient
+        .from('employees')
+        .update({ avatar: photoUrl })
+        .eq('emp_id', empId);
+
+      if (updateError) throw updateError;
+
+      document.getElementById('profile-avatar').style.backgroundImage = `url(${photoUrl})`;
+      document.getElementById('profile-avatar').textContent = '';
+
+      showToast('Profile photo updated');
+    };
+    reader.readAsDataURL(file);
+  } catch (err) {
+    showToast('Failed to upload photo');
+    console.error(err);
+  }
 }
 
 function signOut() {
