@@ -2040,7 +2040,7 @@ async function loadUserData() {
     loadAttendanceData();
     loadCelebrations();
     await restoreClockState();
-    handleMissingClockOut();
+    // handleMissingClockOut();  // TODO: Fix RLS policy for this query
   } catch (err) {
     console.error(err);
   }
