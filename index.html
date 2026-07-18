@@ -31,6 +31,7 @@
   margin: 0;
   padding: 0;
   -webkit-tap-highlight-color: transparent;
+  font-family: 'Inter', sans-serif;
 }
 
 html, body {
@@ -93,14 +94,6 @@ input, select, textarea {
   z-index: 100;
   display: flex;
   justify-content: space-between;
-  align-items: center;
-}
-
-.topbar-logo {
-  height: 28px;
-  width: auto;
-  cursor: pointer;
-  display: flex;
   align-items: center;
 }
 
@@ -186,45 +179,6 @@ input, select, textarea {
   text-transform: uppercase;
   letter-spacing: 0.06em;
   border-bottom: 1px solid rgba(0, 102, 255, 0.1);
-}
-
-.notif-item {
-  display: flex;
-  gap: 10px;
-  padding: 12px 14px;
-  border-bottom: 1px solid rgba(0, 102, 255, 0.06);
-  cursor: pointer;
-  transition: background 0.1s;
-}
-
-.notif-item:hover {
-  background: rgba(0, 102, 255, 0.04);
-}
-
-.notif-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  font-size: 16px;
-  background: rgba(0, 102, 255, 0.2);
-  color: var(--primary-light);
-}
-
-.notif-msg {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--text);
-  line-height: 1.4;
-}
-
-.notif-time {
-  font-size: 10px;
-  color: var(--muted);
-  margin-top: 2px;
 }
 
 .page {
@@ -378,6 +332,35 @@ input, select, textarea {
   color: rgba(255, 255, 255, 0.5);
   font-size: 11px;
   margin-top: 4px;
+}
+
+.clock-times-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(0, 102, 255, 0.1);
+}
+
+.clock-time-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.clock-time-label {
+  font-size: 10px;
+  color: var(--muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.clock-time-val {
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--primary-light);
 }
 
 .clock-status-row {
@@ -724,50 +707,6 @@ input, select, textarea {
   transition: width 0.6s ease;
 }
 
-.req-card {
-  background: var(--surface);
-  border: 1px solid rgba(0, 102, 255, 0.1);
-  border-radius: var(--radius);
-  padding: 12px;
-  margin-bottom: 10px;
-}
-
-.req-type {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.req-meta {
-  font-size: 11px;
-  color: var(--muted);
-  margin-top: 4px;
-  line-height: 1.4;
-}
-
-.pill {
-  font-size: 10px;
-  padding: 3px 9px;
-  border-radius: 20px;
-  font-weight: 600;
-  display: inline-block;
-}
-
-.pill-green {
-  background: rgba(0, 200, 83, 0.2);
-  color: var(--green);
-}
-
-.pill-orange {
-  background: rgba(255, 165, 0, 0.2);
-  color: var(--orange);
-}
-
-.pill-red {
-  background: rgba(255, 77, 106, 0.2);
-  color: var(--red);
-}
-
 .month-picker {
   display: flex;
   gap: 8px;
@@ -848,7 +787,7 @@ input, select, textarea {
   grid-template-columns: repeat(4, 1fr);
   gap: 8px;
   padding: 16px;
-  padding-bottom: 0;
+  padding-bottom: 12px;
 }
 
 .att-stat {
@@ -872,31 +811,26 @@ input, select, textarea {
 }
 
 .cal-wrapper {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(0, 102, 255, 0.15);
+  background: var(--surface);
+  border: 1px solid rgba(0, 102, 255, 0.1);
   border-radius: var(--radius);
-  margin: 0 16px 12px;
+  margin: 0 16px 16px;
   padding: 12px;
-  backdrop-filter: blur(10px);
-}
-
-body.light-mode .cal-wrapper {
-  background: rgba(245, 247, 250, 0.6);
-  border-color: rgba(0, 102, 255, 0.2);
 }
 
 .cal-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
+  gap: 8px;
 }
 
 .cal-day-hdr {
   text-align: center;
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   color: var(--muted);
-  padding: 4px 0;
+  padding: 8px 0;
+  text-transform: uppercase;
 }
 
 .cal-day {
@@ -905,30 +839,36 @@ body.light-mode .cal-wrapper {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 500;
   cursor: default;
   border: 1px solid transparent;
+  background: var(--navy);
+  min-height: 40px;
 }
 
 .cal-day.present {
-  background: rgba(0, 212, 255, 0.1);
+  background: rgba(0, 212, 255, 0.2);
   color: var(--primary-light);
+  border: 1px solid rgba(0, 212, 255, 0.3);
 }
 
 .cal-day.absent {
-  background: rgba(255, 77, 106, 0.1);
+  background: rgba(255, 77, 106, 0.2);
   color: var(--red);
+  border: 1px solid rgba(255, 77, 106, 0.3);
 }
 
 .cal-day.late {
-  background: rgba(255, 165, 0, 0.1);
+  background: rgba(255, 165, 0, 0.2);
   color: var(--orange);
+  border: 1px solid rgba(255, 165, 0, 0.3);
 }
 
 .cal-day.leave {
-  background: rgba(0, 102, 255, 0.1);
+  background: rgba(0, 102, 255, 0.2);
   color: var(--primary);
+  border: 1px solid rgba(0, 102, 255, 0.3);
 }
 
 .cal-day.today {
@@ -936,11 +876,15 @@ body.light-mode .cal-wrapper {
   font-weight: 700;
 }
 
+.log-wrapper {
+  margin: 0 16px;
+}
+
 .log-item {
   background: var(--surface);
   border: 1px solid rgba(0, 102, 255, 0.1);
   border-radius: var(--radius-sm);
-  margin: 0 16px 8px;
+  margin-bottom: 10px;
   overflow: hidden;
 }
 
@@ -951,6 +895,7 @@ body.light-mode .cal-wrapper {
   justify-content: space-between;
   align-items: center;
   transition: background 0.2s;
+  user-select: none;
 }
 
 .log-item-header:hover {
@@ -990,12 +935,25 @@ body.light-mode .cal-wrapper {
   background: rgba(0, 102, 255, 0.02);
   border-top: 1px solid rgba(0, 102, 255, 0.1);
   padding: 12px;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 10px;
 }
 
 .log-item.expanded .log-item-details {
+  display: block;
+}
+
+.log-entry {
   display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(0, 102, 255, 0.08);
+}
+
+.log-entry:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
 }
 
 .log-detail {
@@ -1004,8 +962,8 @@ body.light-mode .cal-wrapper {
 
 .log-detail-label {
   color: var(--muted);
-  margin-bottom: 2px;
-  font-weight: 500;
+  margin-bottom: 3px;
+  font-weight: 600;
   text-transform: uppercase;
   font-size: 9px;
 }
@@ -1446,22 +1404,6 @@ body.light-mode .cal-wrapper {
   }
 }
 
-.pull-to-refresh-indicator {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
-  color: var(--muted);
-  font-size: 12px;
-}
-
-@media (max-width: 380px) {
-  .notif-panel {
-    width: calc(100vw - 32px);
-    right: 16px;
-  }
-}
-
 </style>
 </head>
 <body>
@@ -1575,6 +1517,16 @@ body.light-mode .cal-wrapper {
           <div class="clock-time" id="clock-time">00:00:00</div>
           <div class="clock-date-txt" id="clock-date">—</div>
           <div class="elapsed-time" id="elapsed-time">—</div>
+          <div class="clock-times-row">
+            <div class="clock-time-item">
+              <div class="clock-time-label">Clock In</div>
+              <div class="clock-time-val" id="display-clock-in">—</div>
+            </div>
+            <div class="clock-time-item">
+              <div class="clock-time-label">Clock Out</div>
+              <div class="clock-time-val" id="display-clock-out">—</div>
+            </div>
+          </div>
           <div class="clock-status-row">
             <div class="status-pulse" id="status-pulse" style="background:var(--orange)"></div>
             <span class="clock-status-txt" id="status-txt">Not clocked in</span>
@@ -1746,8 +1698,12 @@ body.light-mode .cal-wrapper {
         <div class="cal-grid" id="cal-container"></div>
       </div>
 
-      <div class="section-title" style="padding:16px 16px 8px">Recent logs</div>
-      <div id="att-log-list"></div>
+      <div style="padding:0 16px">
+        <div class="section-title">Recent logs</div>
+      </div>
+      <div class="log-wrapper">
+        <div id="att-log-list"></div>
+      </div>
     </div>
 
     <!-- PROFILE PAGE -->
@@ -1913,22 +1869,19 @@ body.light-mode .cal-wrapper {
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <script>
-// ════════════════════════════════════════════════════════════
-//  HIVU EMPLOYEE APP - Complete Implementation
-// ════════════════════════════════════════════════════════════
-
 const STATE = {
   user: null,
   clockedIn: false,
   clockInTime: null,
   clockInCoords: null,
+  displayClockInTime: null,
+  displayClockOutTime: null,
   currentPage: 'home',
   isDarkMode: true
 };
 
 let supabaseClient;
 
-// Initialize Supabase
 async function initSupabase() {
   if (!window.HIVU_CONFIG || !HIVU_CONFIG.supabaseUrl || !HIVU_CONFIG.supabaseKey) {
     console.error('Supabase credentials not configured');
@@ -1942,7 +1895,6 @@ async function initSupabase() {
   return true;
 }
 
-// Authentication
 async function sendOTP() {
   const phone = document.getElementById('phone-input').value.trim();
   if (!phone) {
@@ -2025,7 +1977,7 @@ async function loadUserData() {
     updateUIWithUserData(data);
     loadAttendanceData();
     loadCelebrations();
-    restoreClockState();
+    await restoreClockState();
   } catch (err) {
     console.error(err);
   }
@@ -2036,30 +1988,45 @@ async function restoreClockState() {
   const today = new Date().toISOString().split('T')[0];
 
   try {
-    const { data } = await supabaseClient
+    const { data, error } = await supabaseClient
       .from('attendance_logs')
       .select('*')
       .eq('emp_id', empId)
       .eq('date', today)
-      .single();
+      .order('created_at', { ascending: false });
 
-    if (data && data.clock_in_time && !data.clock_out_time) {
-      STATE.clockedIn = true;
-      const inTime = new Date();
-      const [h, m, s] = data.clock_in_time.split(':').map(x => parseInt(x.replace(/[^\d]/g, '')));
-      inTime.setHours(h, m, s);
-      STATE.clockInTime = inTime.getTime();
+    if (data && data.length > 0) {
+      const latestRecord = data[0];
 
-      document.getElementById('status-pulse').style.background = 'var(--primary-light)';
-      document.getElementById('status-pulse').classList.add('pulse-animate');
-      document.getElementById('status-txt').textContent = 'Clocked in ✓';
+      document.getElementById('display-clock-in').textContent = latestRecord.clock_in_time || '—';
+      document.getElementById('display-clock-out').textContent = latestRecord.clock_out_time || '—';
 
-      document.getElementById('clock-btn').className = 'btn-clock btn-clock-out';
-      document.getElementById('clock-btn').innerHTML = '<i class="ti ti-player-stop"></i> <span id="clock-btn-txt">Clock Out</span>';
+      if (latestRecord.clock_in_time && !latestRecord.clock_out_time) {
+        STATE.clockedIn = true;
+        STATE.displayClockInTime = latestRecord.clock_in_time;
 
-      document.getElementById('loc-label').textContent = 'Location verified ✓';
-      if (data.clock_in_lat && data.clock_in_lng) {
-        document.getElementById('loc-coords').textContent = `${data.clock_in_lat.toFixed(4)}°N, ${data.clock_in_lng.toFixed(4)}°E`;
+        const inTime = new Date();
+        const timeParts = latestRecord.clock_in_time.match(/(\d{1,2}):(\d{2}):(\d{2})/);
+        if (timeParts) {
+          const [, h, m, s] = timeParts.map(x => parseInt(x));
+          inTime.setHours(h, m, s);
+          STATE.clockInTime = inTime.getTime();
+        }
+
+        document.getElementById('status-pulse').style.background = 'var(--primary-light)';
+        document.getElementById('status-pulse').classList.add('pulse-animate');
+        document.getElementById('status-txt').textContent = 'Clocked in ✓';
+
+        document.getElementById('clock-btn').className = 'btn-clock btn-clock-out';
+        document.getElementById('clock-btn').innerHTML = '<i class="ti ti-player-stop"></i> <span id="clock-btn-txt">Clock Out</span>';
+
+        document.getElementById('loc-label').textContent = 'Location verified ✓';
+        if (latestRecord.clock_in_lat && latestRecord.clock_in_lng) {
+          document.getElementById('loc-coords').textContent = `${latestRecord.clock_in_lat.toFixed(4)}°N, ${latestRecord.clock_in_lng.toFixed(4)}°E`;
+        }
+      } else if (latestRecord.clock_in_time && latestRecord.clock_out_time) {
+        STATE.displayClockInTime = latestRecord.clock_in_time;
+        STATE.displayClockOutTime = latestRecord.clock_out_time;
       }
     }
   } catch (err) {
@@ -2096,7 +2063,6 @@ function updateUIWithUserData(user) {
 
 async function loadCelebrations() {
   const today = new Date().toISOString().split('T')[0];
-  const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
 
   try {
     const { data } = await supabaseClient
@@ -2207,7 +2173,7 @@ function renderCalendar(logs) {
 function renderAttendanceLogs(logs) {
   if (!logs || logs.length === 0) {
     document.getElementById('att-log-list').innerHTML =
-      '<div style="text-align:center;color:var(--muted);padding:20px">No attendance records</div>';
+      '<div style="text-align:center;color:var(--muted);padding:20px;font-size:12px">No attendance records</div>';
     return;
   }
 
@@ -2219,7 +2185,7 @@ function renderAttendanceLogs(logs) {
     }
   });
 
-  const dates = Object.keys(grouped).sort().reverse().slice(0, 10);
+  const dates = Object.keys(grouped).sort().reverse().slice(0, 15);
   const html = dates.map(date => {
     const dayLogs = grouped[date];
     const firstIn = dayLogs.find(l => l.clock_in_time)?.clock_in_time || '—';
@@ -2242,6 +2208,23 @@ function renderAttendanceLogs(logs) {
     const dateObj = new Date(date);
     const dateStr = dateObj.toLocaleDateString('en-IN', {weekday:'short', month:'short', day:'numeric'});
 
+    const detailsHtml = dayLogs.map(log => `
+      <div class="log-entry">
+        <div class="log-detail">
+          <div class="log-detail-label">Clock In</div>
+          <div class="log-detail-val">${log.clock_in_time || '—'}</div>
+        </div>
+        <div class="log-detail">
+          <div class="log-detail-label">Clock Out</div>
+          <div class="log-detail-val">${log.clock_out_time || '—'}</div>
+        </div>
+        <div class="log-detail">
+          <div class="log-detail-label">Hours</div>
+          <div class="log-detail-val">${log.hours_worked || '—'}</div>
+        </div>
+      </div>
+    `).join('');
+
     return `
       <div class="log-item" onclick="this.classList.toggle('expanded')">
         <div class="log-item-header">
@@ -2252,18 +2235,7 @@ function renderAttendanceLogs(logs) {
           <div class="log-item-expand-icon">⌄</div>
         </div>
         <div class="log-item-details">
-          <div class="log-detail">
-            <div class="log-detail-label">First In</div>
-            <div class="log-detail-val">${firstIn}</div>
-          </div>
-          <div class="log-detail">
-            <div class="log-detail-label">Last Out</div>
-            <div class="log-detail-val">${lastOut}</div>
-          </div>
-          <div class="log-detail">
-            <div class="log-detail-label">Total</div>
-            <div class="log-detail-val">${totalStr}</div>
-          </div>
+          ${detailsHtml}
         </div>
       </div>
     `;
@@ -2286,11 +2258,12 @@ function startClock() {
       const mins = Math.floor((elapsed % 3600000) / 60000);
       const secs = Math.floor((elapsed % 60000) / 1000);
       document.getElementById('elapsed-time').textContent = `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    } else {
+      document.getElementById('elapsed-time').textContent = '—';
     }
   }, 1000);
 }
 
-// Clock In/Out
 function handleClock() {
   if (STATE.clockedIn) {
     clockOut();
@@ -2372,6 +2345,7 @@ async function confirmClock() {
 
   const now = new Date();
   const empId = localStorage.getItem('auth_emp_id');
+  const clockInTimeStr = now.toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:true});
 
   try {
     const { error } = await supabaseClient
@@ -2379,7 +2353,7 @@ async function confirmClock() {
       .insert({
         emp_id: empId,
         date: now.toISOString().split('T')[0],
-        clock_in_time: now.toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:true}),
+        clock_in_time: clockInTimeStr,
         clock_in_lat: STATE.clockInCoords.lat,
         clock_in_lng: STATE.clockInCoords.lng,
         clock_in_accuracy: Math.round(STATE.clockInCoords.acc),
@@ -2390,6 +2364,9 @@ async function confirmClock() {
 
     STATE.clockedIn = true;
     STATE.clockInTime = Date.now();
+    STATE.displayClockInTime = clockInTimeStr;
+    document.getElementById('display-clock-in').textContent = clockInTimeStr;
+    document.getElementById('display-clock-out').textContent = '—';
 
     document.getElementById('status-pulse').style.background = 'var(--primary-light)';
     document.getElementById('status-pulse').classList.add('pulse-animate');
@@ -2403,6 +2380,7 @@ async function confirmClock() {
 
     closeGpsModal();
     showToast('Clocked in successfully');
+    loadAttendanceData();
   } catch (err) {
     showToast('Clock in failed');
     console.error(err);
@@ -2436,6 +2414,7 @@ async function proceedClockOut() {
   const empId = localStorage.getItem('auth_emp_id');
   const hours = Math.floor((Date.now() - STATE.clockInTime) / 3600000);
   const mins = Math.floor(((Date.now() - STATE.clockInTime) % 3600000) / 60000);
+  const clockOutTimeStr = now.toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:true});
 
   try {
     const today = now.toISOString().split('T')[0];
@@ -2444,13 +2423,15 @@ async function proceedClockOut() {
       .select('id')
       .eq('emp_id', empId)
       .eq('date', today)
+      .order('created_at', { ascending: false })
+      .limit(1)
       .single();
 
     if (existing) {
       const { error } = await supabaseClient
         .from('attendance_logs')
         .update({
-          clock_out_time: now.toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:true}),
+          clock_out_time: clockOutTimeStr,
           clock_out_lat: STATE.clockInCoords?.lat,
           clock_out_lng: STATE.clockInCoords?.lng,
           hours_worked: `${hours}h ${mins}m`
@@ -2461,6 +2442,9 @@ async function proceedClockOut() {
     }
 
     STATE.clockedIn = false;
+    STATE.displayClockOutTime = clockOutTimeStr;
+    document.getElementById('display-clock-out').textContent = clockOutTimeStr;
+
     document.getElementById('status-pulse').style.background = 'var(--orange)';
     document.getElementById('status-pulse').classList.remove('pulse-animate');
     document.getElementById('status-txt').textContent = `Clocked out · ${hours}h ${mins}m`;
@@ -2470,13 +2454,13 @@ async function proceedClockOut() {
 
     closeGpsModal();
     showToast(`Clocked out · ${hours}h ${mins}m logged`);
+    loadAttendanceData();
   } catch (err) {
     showToast('Clock out failed');
     console.error(err);
   }
 }
 
-// Leave
 async function submitLeave() {
   const empId = localStorage.getItem('auth_emp_id');
   const leaveType = document.getElementById('leave-type').value;
@@ -2515,7 +2499,6 @@ async function submitLeave() {
   }
 }
 
-// UI
 function goTo(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('pg-' + page).classList.add('active');
@@ -2572,7 +2555,6 @@ function signOut() {
   location.reload();
 }
 
-// Initialize
 window.addEventListener('load', async () => {
   if (!await initSupabase()) return;
 
