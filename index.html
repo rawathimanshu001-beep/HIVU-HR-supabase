@@ -9,7 +9,7 @@
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/tabler-icons.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
 <style>
 :root{
   --primary: #0066FF;
@@ -360,17 +360,9 @@ input, select, textarea {
 
 .clock-time {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 18px;
-  font-weight: 500;
-  color: var(--muted);
-  letter-spacing: 0.02em;
-}
-
-.elapsed-time {
   font-size: 32px;
-  font-weight: 700;
-  color: var(--primary-light);
-  margin-top: 8px;
+  font-weight: 600;
+  color: var(--text);
   letter-spacing: 0.02em;
 }
 
@@ -871,24 +863,11 @@ input, select, textarea {
   margin-top: 4px;
 }
 
-.cal-wrapper {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(0, 102, 255, 0.15);
-  border-radius: var(--radius);
-  margin: 0 16px 12px;
-  padding: 12px;
-  backdrop-filter: blur(10px);
-}
-
-body.light-mode .cal-wrapper {
-  background: rgba(245, 247, 250, 0.6);
-  border-color: rgba(0, 102, 255, 0.2);
-}
-
 .cal-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 4px;
+  padding: 16px;
 }
 
 .cal-day-hdr {
@@ -940,62 +919,21 @@ body.light-mode .cal-wrapper {
   background: var(--surface);
   border: 1px solid rgba(0, 102, 255, 0.1);
   border-radius: var(--radius-sm);
-  margin: 0 16px 8px;
-  overflow: hidden;
-}
-
-.log-item-header {
   padding: 12px;
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  transition: background 0.2s;
-}
-
-.log-item-header:hover {
-  background: rgba(0, 102, 255, 0.05);
+  margin: 0 16px 8px;
 }
 
 .log-item-date {
   font-size: 13px;
   font-weight: 600;
   color: var(--text);
-}
-
-.log-item-summary {
-  font-size: 11px;
-  color: var(--muted);
-  margin-top: 2px;
-}
-
-.log-item-expand-icon {
-  width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--primary-light);
-  font-size: 14px;
-  transition: transform 0.2s;
-  flex-shrink: 0;
-}
-
-.log-item.expanded .log-item-expand-icon {
-  transform: rotate(180deg);
+  margin-bottom: 6px;
 }
 
 .log-item-details {
-  display: none;
-  background: rgba(0, 102, 255, 0.02);
-  border-top: 1px solid rgba(0, 102, 255, 0.1);
-  padding: 12px;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 10px;
-}
-
-.log-item.expanded .log-item-details {
   display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
 }
 
 .log-detail {
@@ -1005,16 +943,13 @@ body.light-mode .cal-wrapper {
 .log-detail-label {
   color: var(--muted);
   margin-bottom: 2px;
-  font-weight: 500;
-  text-transform: uppercase;
-  font-size: 9px;
 }
 
 .log-detail-val {
   font-weight: 600;
   font-family: 'JetBrains Mono', monospace;
   color: var(--primary-light);
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .profile-hero {
@@ -1574,7 +1509,6 @@ body.light-mode .cal-wrapper {
         <div class="clock-top">
           <div class="clock-time" id="clock-time">00:00:00</div>
           <div class="clock-date-txt" id="clock-date">—</div>
-          <div class="elapsed-time" id="elapsed-time">—</div>
           <div class="clock-status-row">
             <div class="status-pulse" id="status-pulse" style="background:var(--orange)"></div>
             <span class="clock-status-txt" id="status-txt">Not clocked in</span>
@@ -1742,9 +1676,7 @@ body.light-mode .cal-wrapper {
         </div>
       </div>
 
-      <div class="cal-wrapper">
-        <div class="cal-grid" id="cal-container"></div>
-      </div>
+      <div class="cal-grid" id="cal-container"></div>
 
       <div class="section-title" style="padding:16px 16px 8px">Recent logs</div>
       <div id="att-log-list"></div>
@@ -1926,7 +1858,7 @@ const STATE = {
   isDarkMode: true
 };
 
-let supabase;
+let supabaseClient;
 
 // Initialize Supabase
 async function initSupabase() {
@@ -1937,7 +1869,7 @@ async function initSupabase() {
   }
 
   const { createClient } = window.supabase;
-  supabase = createClient(HIVU_CONFIG.supabaseUrl, HIVU_CONFIG.supabaseKey);
+  supabaseClient = createClient(HIVU_CONFIG.supabaseUrl, HIVU_CONFIG.supabaseKey);
   console.log('✓ Supabase initialized');
   return true;
 }
@@ -1951,7 +1883,7 @@ async function sendOTP() {
   }
 
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('employees')
       .select('*')
       .eq('phone', phone)
@@ -2010,7 +1942,7 @@ async function loadUserData() {
   const empId = localStorage.getItem('auth_emp_id');
 
   try {
-    const { data, error } = await supabase
+    const { data, error } = await supabaseClient
       .from('employees')
       .select('*')
       .eq('emp_id', empId)
@@ -2025,45 +1957,8 @@ async function loadUserData() {
     updateUIWithUserData(data);
     loadAttendanceData();
     loadCelebrations();
-    restoreClockState();
   } catch (err) {
     console.error(err);
-  }
-}
-
-async function restoreClockState() {
-  const empId = localStorage.getItem('auth_emp_id');
-  const today = new Date().toISOString().split('T')[0];
-
-  try {
-    const { data } = await supabase
-      .from('attendance_logs')
-      .select('*')
-      .eq('emp_id', empId)
-      .eq('date', today)
-      .single();
-
-    if (data && data.clock_in_time && !data.clock_out_time) {
-      STATE.clockedIn = true;
-      const inTime = new Date();
-      const [h, m, s] = data.clock_in_time.split(':').map(x => parseInt(x.replace(/[^\d]/g, '')));
-      inTime.setHours(h, m, s);
-      STATE.clockInTime = inTime.getTime();
-
-      document.getElementById('status-pulse').style.background = 'var(--primary-light)';
-      document.getElementById('status-pulse').classList.add('pulse-animate');
-      document.getElementById('status-txt').textContent = 'Clocked in ✓';
-
-      document.getElementById('clock-btn').className = 'btn-clock btn-clock-out';
-      document.getElementById('clock-btn').innerHTML = '<i class="ti ti-player-stop"></i> <span id="clock-btn-txt">Clock Out</span>';
-
-      document.getElementById('loc-label').textContent = 'Location verified ✓';
-      if (data.clock_in_lat && data.clock_in_lng) {
-        document.getElementById('loc-coords').textContent = `${data.clock_in_lat.toFixed(4)}°N, ${data.clock_in_lng.toFixed(4)}°E`;
-      }
-    }
-  } catch (err) {
-    console.log('No active clock-in session');
   }
 }
 
@@ -2099,7 +1994,7 @@ async function loadCelebrations() {
   const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
 
   try {
-    const { data } = await supabase
+    const { data } = await supabaseClient
       .from('employees')
       .select('name, dob, work_anniversary')
       .or(`dob.eq.${today},work_anniversary.eq.${today}`);
@@ -2132,7 +2027,7 @@ async function loadAttendanceData() {
   const currentMonth = new Date().toISOString().split('T')[0].slice(0, 7);
 
   try {
-    const { data } = await supabase
+    const { data } = await supabaseClient
       .from('attendance_logs')
       .select('*')
       .eq('emp_id', empId)
@@ -2211,63 +2106,25 @@ function renderAttendanceLogs(logs) {
     return;
   }
 
-  const grouped = {};
-  logs.forEach(log => {
-    if (log.date) {
-      if (!grouped[log.date]) grouped[log.date] = [];
-      grouped[log.date].push(log);
-    }
-  });
-
-  const dates = Object.keys(grouped).sort().reverse().slice(0, 10);
-  const html = dates.map(date => {
-    const dayLogs = grouped[date];
-    const firstIn = dayLogs.find(l => l.clock_in_time)?.clock_in_time || '—';
-    const lastOut = [...dayLogs].reverse().find(l => l.clock_out_time)?.clock_out_time || '—';
-
-    let totalHours = 0;
-    dayLogs.forEach(log => {
-      if (log.hours_worked) {
-        const parts = log.hours_worked.match(/(\d+)h\s*(\d+)m/);
-        if (parts) {
-          totalHours += parseInt(parts[1]) * 60 + parseInt(parts[2]);
-        }
-      }
-    });
-
-    const totalH = Math.floor(totalHours / 60);
-    const totalM = totalHours % 60;
-    const totalStr = totalH > 0 || totalM > 0 ? `${totalH}h ${totalM}m` : '—';
-
-    const dateObj = new Date(date);
-    const dateStr = dateObj.toLocaleDateString('en-IN', {weekday:'short', month:'short', day:'numeric'});
-
-    return `
-      <div class="log-item" onclick="this.classList.toggle('expanded')">
-        <div class="log-item-header">
-          <div>
-            <div class="log-item-date">${dateStr}</div>
-            <div class="log-item-summary">${dayLogs.length} entry(ies) · ${totalStr}</div>
-          </div>
-          <div class="log-item-expand-icon">⌄</div>
+  const html = logs.slice(-10).reverse().map(log => `
+    <div class="log-item">
+      <div class="log-item-date">${new Date(log.date).toLocaleDateString('en-IN', {weekday:'short', month:'short', day:'numeric'})}</div>
+      <div class="log-item-details">
+        <div class="log-detail">
+          <div class="log-detail-label">In</div>
+          <div class="log-detail-val">${log.clock_in_time || '—'}</div>
         </div>
-        <div class="log-item-details">
-          <div class="log-detail">
-            <div class="log-detail-label">First In</div>
-            <div class="log-detail-val">${firstIn}</div>
-          </div>
-          <div class="log-detail">
-            <div class="log-detail-label">Last Out</div>
-            <div class="log-detail-val">${lastOut}</div>
-          </div>
-          <div class="log-detail">
-            <div class="log-detail-label">Total</div>
-            <div class="log-detail-val">${totalStr}</div>
-          </div>
+        <div class="log-detail">
+          <div class="log-detail-label">Out</div>
+          <div class="log-detail-val">${log.clock_out_time || '—'}</div>
+        </div>
+        <div class="log-detail">
+          <div class="log-detail-label">Hours</div>
+          <div class="log-detail-val">${log.hours_worked || '—'}</div>
         </div>
       </div>
-    `;
-  }).join('');
+    </div>
+  `).join('');
 
   document.getElementById('att-log-list').innerHTML = html;
 }
@@ -2279,14 +2136,6 @@ function startClock() {
       now.toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:false});
     document.getElementById('clock-date').textContent =
       now.toLocaleDateString('en-IN', {weekday:'long', year:'numeric', month:'long', day:'numeric'});
-
-    if (STATE.clockedIn && STATE.clockInTime) {
-      const elapsed = Date.now() - STATE.clockInTime;
-      const hours = Math.floor(elapsed / 3600000);
-      const mins = Math.floor((elapsed % 3600000) / 60000);
-      const secs = Math.floor((elapsed % 60000) / 1000);
-      document.getElementById('elapsed-time').textContent = `${String(hours).padStart(2, '0')}:${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-    }
   }, 1000);
 }
 
@@ -2374,7 +2223,7 @@ async function confirmClock() {
   const empId = localStorage.getItem('auth_emp_id');
 
   try {
-    const { error } = await supabase
+    const { error } = await supabaseClient
       .from('attendance_logs')
       .insert({
         emp_id: empId,
@@ -2439,7 +2288,7 @@ async function proceedClockOut() {
 
   try {
     const today = now.toISOString().split('T')[0];
-    const { data: existing } = await supabase
+    const { data: existing } = await supabaseClient
       .from('attendance_logs')
       .select('id')
       .eq('emp_id', empId)
@@ -2447,7 +2296,7 @@ async function proceedClockOut() {
       .single();
 
     if (existing) {
-      const { error } = await supabase
+      const { error } = await supabaseClient
         .from('attendance_logs')
         .update({
           clock_out_time: now.toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:true}),
@@ -2490,7 +2339,7 @@ async function submitLeave() {
   }
 
   try {
-    const { error } = await supabase
+    const { error } = await supabaseClient
       .from('leave_requests')
       .insert({
         emp_id: empId,
