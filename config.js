@@ -13,7 +13,7 @@ window.HIVU_CONFIG = {
   // ── SUPABASE CREDENTIALS ──────────────────────────────────
   // Get these from: Supabase Dashboard → Settings → API
   supabaseUrl: "https://kaiiffxgnpjsgswuhukj.supabase.co",
-  supabaseKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImthaWlmZngnbnBqc2dzd3VodWtqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQyNzA5MDcsImV4cCI6MjA5OTg0NjkwN30.E5PArYijB5aJ8eBNQ_tr0gUPpa4oAM72VmHCjqWoFw0",
+  supabaseKey: "sb_publishable_C-_YpbQRpxvU3l1pcUjIHg_rmDPGRnr",
 
   // ── COMPANY DETAILS ───────────────────────────────────────
   company: {
