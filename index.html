@@ -10,6 +10,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
 :root{
   --primary: #0066FF;
@@ -1880,37 +1882,7 @@ input, select, textarea {
       <button class="gps-modal-close" onclick="closeGpsModal()"><i class="ti ti-x"></i></button>
     </div>
     <div class="gps-map-wrap" id="gps-map-wrap">
-      <svg id="gps-map-svg" viewBox="0 0 320 320" width="100%" height="100%">
-        <defs>
-          <radialGradient id="mapBgGrad" cx="50%" cy="50%" r="75%">
-            <stop offset="0%" stop-color="#12213b"/>
-            <stop offset="100%" stop-color="#060a16"/>
-          </radialGradient>
-          <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stop-color="#00D4FF"/>
-            <stop offset="100%" stop-color="#0066FF"/>
-          </linearGradient>
-          <radialGradient id="youGlow" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stop-color="#00D4FF" stop-opacity="0.9"/>
-            <stop offset="100%" stop-color="#00D4FF" stop-opacity="0"/>
-          </radialGradient>
-        </defs>
-        <rect x="0" y="0" width="320" height="320" fill="url(#mapBgGrad)"/>
-        <g stroke="rgba(0,212,255,0.06)" stroke-width="1">
-          <line x1="0" y1="40" x2="320" y2="40"/><line x1="0" y1="80" x2="320" y2="80"/>
-          <line x1="0" y1="120" x2="320" y2="120"/><line x1="0" y1="160" x2="320" y2="160"/>
-          <line x1="0" y1="200" x2="320" y2="200"/><line x1="0" y1="240" x2="320" y2="240"/>
-          <line x1="0" y1="280" x2="320" y2="280"/>
-          <line x1="40" y1="0" x2="40" y2="320"/><line x1="80" y1="0" x2="80" y2="320"/>
-          <line x1="120" y1="0" x2="120" y2="320"/><line x1="160" y1="0" x2="160" y2="320"/>
-          <line x1="200" y1="0" x2="200" y2="320"/><line x1="240" y1="0" x2="240" y2="320"/>
-          <line x1="280" y1="0" x2="280" y2="320"/>
-        </g>
-        <circle id="gps-radius-ring" cx="160" cy="160" r="90" fill="none" stroke="url(#ringGrad)" stroke-width="1.5" stroke-dasharray="4 3"/>
-        <circle cx="160" cy="160" r="34" fill="url(#youGlow)"/>
-        <circle cx="160" cy="160" r="7" fill="#0A0F25" stroke="url(#ringGrad)" stroke-width="2.5"/>
-        <circle cx="160" cy="160" r="3" fill="#00D4FF"/>
-      </svg>
+      <div id="leaflet-map" style="width:100%;height:100%;border-radius:0;background:#060a16"></div>
       <div class="gps-loading" id="gps-loading"><div class="loader" style="width:22px;height:22px;border-width:3px"></div></div>
     </div>
     <div class="gps-modal-footer">
@@ -2381,6 +2353,84 @@ function renderAttendanceLogs(logs) {
   document.getElementById('att-log-list').innerHTML = html;
 }
 
+let leafletMap = null;
+let userMarker = null;
+let officeMarker = null;
+let radiusCircle = null;
+
+function initLeafletMap() {
+  if (leafletMap) leafletMap.remove();
+
+  const mapContainer = document.getElementById('leaflet-map');
+  if (!mapContainer) return;
+
+  const officeLat = HIVU_CONFIG.office.lat || 28.6139;
+  const officeLng = HIVU_CONFIG.office.lng || 77.2090;
+
+  leafletMap = L.map('leaflet-map', {
+    center: [officeLat, officeLng],
+    zoom: 16,
+    zoomControl: true,
+    attributionControl: false
+  });
+
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom: 19,
+    className: 'leaflet-tile-layer'
+  }).addTo(leafletMap);
+
+  officeMarker = L.circleMarker([officeLat, officeLng], {
+    radius: 10,
+    fillColor: '#FF4D6A',
+    color: '#FF4D6A',
+    weight: 2,
+    opacity: 0.8,
+    fillOpacity: 0.7
+  }).addTo(leafletMap).bindPopup('📍 Office Location');
+
+  radiusCircle = L.circle([officeLat, officeLng], {
+    radius: HIVU_CONFIG.office.radius || 500,
+    color: '#00D4FF',
+    fillColor: '#00D4FF',
+    weight: 2,
+    opacity: 0.3,
+    fillOpacity: 0.1,
+    dashArray: '5, 5'
+  }).addTo(leafletMap);
+}
+
+function updateLeafletMap(userLat, userLng) {
+  if (!leafletMap) return;
+
+  const officeLat = HIVU_CONFIG.office.lat || 28.6139;
+  const officeLng = HIVU_CONFIG.office.lng || 77.2090;
+
+  if (userMarker) leafletMap.removeLayer(userMarker);
+
+  userMarker = L.circleMarker([userLat, userLng], {
+    radius: 8,
+    fillColor: '#00D4FF',
+    color: '#0066FF',
+    weight: 3,
+    opacity: 1,
+    fillOpacity: 0.9
+  }).addTo(leafletMap).bindPopup('📍 Your Location');
+
+  leafletMap.setView([userLat, userLng], 16, {animate: true});
+
+  const dist = calculateDistance(officeLat, officeLng, userLat, userLng);
+  document.getElementById('gps-dist-val').textContent = formatDistance(dist);
+
+  const pill = document.getElementById('gps-status-pill');
+  if (dist <= (HIVU_CONFIG.office.radius || 500)) {
+    pill.textContent = '✓ Inside zone';
+    pill.className = 'gps-status-pill inside';
+  } else {
+    pill.textContent = '⚠ Outside zone';
+    pill.className = 'gps-status-pill outside';
+  }
+}
+
 function startClock() {
   setInterval(() => {
     const now = new Date();
@@ -2451,6 +2501,10 @@ function openGpsModal() {
   document.getElementById('gps-loading').style.display = 'flex';
   document.getElementById('gps-modal-sub').textContent = 'Getting location...';
   document.getElementById('gps-radius-val').textContent = HIVU_CONFIG.office.radius + ' m';
+
+  setTimeout(() => {
+    initLeafletMap();
+  }, 100);
 }
 
 function closeGpsModal() {
@@ -2469,6 +2523,10 @@ function updateGpsModal(dist, radius) {
   } else {
     pill.textContent = '⚠ Outside zone';
     pill.className = 'gps-status-pill outside';
+  }
+
+  if (STATE.clockInCoords) {
+    updateLeafletMap(STATE.clockInCoords.lat, STATE.clockInCoords.lng);
   }
 }
 
