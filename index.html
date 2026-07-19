@@ -1384,8 +1384,9 @@ input, select, textarea {
 .gps-map-wrap {
   position: relative;
   width: 100%;
-  aspect-ratio: 1;
+  height: 320px;
   background: #060a16;
+  overflow: hidden;
 }
 
 .gps-loading {
@@ -1459,6 +1460,56 @@ input, select, textarea {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+.leaflet-container {
+  background: #0a0f25 !important;
+  font-family: 'Inter', sans-serif !important;
+}
+
+.leaflet-tile {
+  filter: brightness(0.85) saturate(1.2);
+}
+
+body.light-mode .leaflet-tile {
+  filter: brightness(1) saturate(1);
+}
+
+.leaflet-popup-content-wrapper {
+  background: var(--surface) !important;
+  color: var(--text) !important;
+  border: 1px solid rgba(0, 102, 255, 0.2) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+}
+
+.leaflet-popup-tip {
+  background: var(--surface) !important;
+  border: 1px solid rgba(0, 102, 255, 0.2) !important;
+}
+
+.leaflet-control-attribution {
+  background: var(--surface) !important;
+  color: var(--muted) !important;
+}
+
+.leaflet-control-zoom {
+  background: var(--surface) !important;
+  border: 1px solid rgba(0, 102, 255, 0.2) !important;
+  box-shadow: none !important;
+}
+
+.leaflet-control-zoom-in, .leaflet-control-zoom-out {
+  background: var(--surface) !important;
+  color: var(--primary-light) !important;
+  border-bottom: 1px solid rgba(0, 102, 255, 0.2) !important;
+}
+
+.leaflet-control-zoom-in:hover, .leaflet-control-zoom-out:hover {
+  background: var(--navy) !important;
+}
+
+#gps-map-wrap {
+  background: #0a0f25 !important;
 }
 
 </style>
