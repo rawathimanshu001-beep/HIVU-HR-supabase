@@ -2090,7 +2090,7 @@ async function loadUserData() {
     }
 
     STATE.user = data;
-    updateUIWithUserData(data);
+    await updateUIWithUserData(data);
     loadAttendanceData();
     await loadCelebrations();
     await restoreClockState();
@@ -2182,7 +2182,7 @@ async function handleMissingClockOut() {
   }
 }
 
-function updateUIWithUserData(user) {
+async function updateUIWithUserData(user) {
   const hour = new Date().getHours();
   let greeting = 'Good morning';
   if (hour >= 12 && hour < 17) greeting = 'Good afternoon';
