@@ -2195,52 +2195,58 @@ async function loadCelebrations() {
       .select('emp_id, name, dob, work_anniversary, avatar');
 
     if (data && data.length > 0) {
-      const celebrations = [];
+      const celebByName = {};
+      const currentMonthDay = `${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
       data.forEach(emp => {
+        if (!celebByName[emp.name]) {
+          celebByName[emp.name] = {
+            name: emp.name,
+            types: [],
+            dates: [],
+            avatar: emp.avatar,
+            initials: (emp.name || '?').split(' ').map(n => n[0]).join('')
+          };
+        }
+
         if (emp.dob) {
           const bdayMonth = emp.dob.slice(5, 7);
           const bdayDay = emp.dob.slice(8, 10);
-          const currentMonthDay = `${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-
           if (bdayMonth + '-' + bdayDay >= currentMonthDay) {
-            celebrations.push({
-              name: emp.name,
-              type: 'birthday',
-              date: bdayMonth + '-' + bdayDay,
-              avatar: emp.avatar,
-              initials: (emp.name || '?').split(' ').map(n => n[0]).join('')
-            });
+            celebByName[emp.name].types.push('birthday');
+            celebByName[emp.name].dates.push(bdayMonth + '-' + bdayDay);
           }
         }
 
         if (emp.work_anniversary) {
           const annivMonth = emp.work_anniversary.slice(5, 7);
           const annivDay = emp.work_anniversary.slice(8, 10);
-          const currentMonthDay = `${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
-
           if (annivMonth + '-' + annivDay >= currentMonthDay) {
-            celebrations.push({
-              name: emp.name,
-              type: 'work_anniversary',
-              date: annivMonth + '-' + annivDay,
-              avatar: emp.avatar,
-              initials: (emp.name || '?').split(' ').map(n => n[0]).join('')
-            });
+            celebByName[emp.name].types.push('work_anniversary');
+            celebByName[emp.name].dates.push(annivMonth + '-' + annivDay);
           }
         }
       });
 
-      celebrations.sort((a, b) => a.date.localeCompare(b.date));
+      const celebrations = Object.values(celebByName).filter(c => c.types.length > 0);
+      celebrations.sort((a, b) => Math.min(...a.dates).localeCompare(Math.min(...b.dates)));
 
       if (celebrations.length > 0) {
         const html = celebrations.map(cel => {
-          const isBday = cel.type === 'birthday';
+          let typeText = '';
+          if (cel.types.includes('birthday') && cel.types.includes('work_anniversary')) {
+            typeText = 'Birthday • Work Anniv.';
+          } else if (cel.types.includes('birthday')) {
+            typeText = 'Birthday';
+          } else {
+            typeText = 'Work Anniv.';
+          }
+
           return `
             <div class="celebrate-item">
               <div class="celebrate-avatar">${cel.initials}</div>
               <div class="celebrate-name">${cel.name}</div>
-              <div class="celebrate-sub">${isBday ? 'Birthday' : 'Work Anniv.'}</div>
+              <div class="celebrate-sub">${typeText}</div>
             </div>
           `;
         }).join('');
