@@ -1702,44 +1702,70 @@ body.light-mode .leaflet-tile {
 
     <!-- LEAVE PAGE -->
     <div class="page" id="pg-leave">
-      <div class="section-title" style="padding:16px 16px 0">Leave balance</div>
-      <div class="balance-grid">
-        <div class="bal-card">
-          <div class="bal-type">Casual leave</div>
-          <div class="bal-count" id="leave-casual">8 <span class="bal-total">/ 12</span></div>
-          <div class="bal-bar"><div class="bal-fill" style="width:33%;background:var(--primary)"></div></div>
-        </div>
-        <div class="bal-card">
-          <div class="bal-type">Sick leave</div>
-          <div class="bal-count" id="leave-sick">5 <span class="bal-total">/ 6</span></div>
-          <div class="bal-bar"><div class="bal-fill" style="width:17%;background:var(--primary-light)"></div></div>
+      <!-- LEAVE TABS -->
+      <div style="display:flex;gap:8px;padding:12px 16px;overflow-x:auto;border-bottom:1px solid rgba(0,102,255,0.1)">
+        <button class="tab-btn active" onclick="switchLeaveTab('balance')" style="flex-shrink:0;padding:8px 16px;border-radius:20px;border:1px solid rgba(0,102,255,0.3);background:linear-gradient(135deg,var(--primary),var(--primary-light));color:white;font-size:12px;font-weight:600;cursor:pointer">Balance</button>
+        <button class="tab-btn" onclick="switchLeaveTab('apply')" style="flex-shrink:0;padding:8px 16px;border-radius:20px;border:1px solid rgba(0,102,255,0.2);background:transparent;color:var(--text);font-size:12px;font-weight:600;cursor:pointer">Apply</button>
+        <button class="tab-btn" onclick="switchLeaveTab('history')" style="flex-shrink:0;padding:8px 16px;border-radius:20px;border:1px solid rgba(0,102,255,0.2);background:transparent;color:var(--text);font-size:12px;font-weight:600;cursor:pointer">History</button>
+        <button class="tab-btn" onclick="switchLeaveTab('holidays')" style="flex-shrink:0;padding:8px 16px;border-radius:20px;border:1px solid rgba(0,102,255,0.2);background:transparent;color:var(--text);font-size:12px;font-weight:600;cursor:pointer">Holidays</button>
+      </div>
+
+      <!-- BALANCE TAB -->
+      <div id="leave-balance-tab" style="display:block">
+        <div class="section-title" style="padding:16px 16px 0">Leave balance</div>
+        <div class="balance-grid" id="leave-balance-container">
+          <div style="text-align:center;color:var(--muted);padding:20px;font-size:12px">Loading...</div>
         </div>
       </div>
 
-      <div class="form-card">
-        <div class="section-title" style="padding:0 0 12px">Apply for leave</div>
-        <div class="form-group">
-          <label class="form-label">Leave type</label>
-          <select class="form-select" id="leave-type">
-            <option value="">Select leave type</option>
-            <option>Casual Leave</option>
-            <option>Sick Leave</option>
-            <option>Earned Leave</option>
-          </select>
+      <!-- APPLY TAB -->
+      <div id="leave-apply-tab" style="display:none">
+        <div class="form-card">
+          <div class="section-title" style="padding:0 0 12px">Apply for leave</div>
+          <div class="form-group">
+            <label class="form-label">Leave type</label>
+            <select class="form-select" id="leave-type">
+              <option value="">Select leave type</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Available</label>
+            <div style="font-size:14px;font-weight:600;color:var(--primary-light);padding:8px 0" id="leave-available">—</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">From date</label>
+            <input type="date" class="form-input" id="leave-from">
+          </div>
+          <div class="form-group">
+            <label class="form-label">To date</label>
+            <input type="date" class="form-input" id="leave-to">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Days</label>
+            <div style="font-size:14px;font-weight:600;color:var(--primary-light);padding:8px 0" id="leave-days">0</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Reason</label>
+            <textarea class="form-textarea" id="leave-reason" rows="3" placeholder="Reason..."></textarea>
+          </div>
+          <button class="btn-submit" onclick="submitLeave()">Submit Request</button>
         </div>
-        <div class="form-group">
-          <label class="form-label">From date</label>
-          <input type="date" class="form-input" id="leave-from">
+      </div>
+
+      <!-- HISTORY TAB -->
+      <div id="leave-history-tab" style="display:none">
+        <div class="section-title" style="padding:16px 16px 0">Leave applications</div>
+        <div class="log-wrapper" id="leave-history-container">
+          <div style="text-align:center;color:var(--muted);padding:20px;font-size:12px">Loading...</div>
         </div>
-        <div class="form-group">
-          <label class="form-label">To date</label>
-          <input type="date" class="form-input" id="leave-to">
+      </div>
+
+      <!-- HOLIDAYS TAB -->
+      <div id="leave-holidays-tab" style="display:none">
+        <div class="section-title" style="padding:16px 16px 0">Company holidays</div>
+        <div id="holiday-list-container" style="padding:16px">
+          <div style="text-align:center;color:var(--muted);font-size:12px">Loading...</div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Reason</label>
-          <textarea class="form-textarea" id="leave-reason" rows="3" placeholder="Reason..."></textarea>
-        </div>
-        <button class="btn-submit" onclick="submitLeave()">Submit Request</button>
       </div>
     </div>
 
@@ -2703,8 +2729,9 @@ async function clockOut() {
 async function proceedClockOut() {
   const now = new Date();
   const empId = localStorage.getItem('auth_emp_id');
-  const hours = Math.floor((Date.now() - STATE.clockInTime) / 3600000);
-  const mins = Math.floor(((Date.now() - STATE.clockInTime) % 3600000) / 60000);
+  const elapsedMs = Date.now() - STATE.clockInTime;
+  const hours = Math.floor(elapsedMs / 3600000);
+  const mins = Math.floor((elapsedMs % 3600000) / 60000);
   const totalHours = hours + (mins / 60);
   const clockOutTimeStr = now.toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:true});
   const localDate = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
@@ -2787,26 +2814,180 @@ async function proceedClockOut() {
   }
 }
 
+function switchLeaveTab(tab) {
+  document.getElementById('leave-balance-tab').style.display = 'none';
+  document.getElementById('leave-apply-tab').style.display = 'none';
+  document.getElementById('leave-history-tab').style.display = 'none';
+  document.getElementById('leave-holidays-tab').style.display = 'none';
+  document.getElementById(`leave-${tab}-tab`).style.display = 'block';
+
+  if (tab === 'history') loadLeaveHistory();
+  if (tab === 'holidays') loadCompanyHolidays();
+}
+
+async function loadLeaveTypes() {
+  try {
+    const { data } = await supabaseClient
+      .from('leave_types')
+      .select('*')
+      .eq('is_active', true);
+
+    if (data) {
+      const select = document.getElementById('leave-type');
+      select.innerHTML = '<option value="">Select leave type</option>';
+      data.forEach(type => {
+        select.innerHTML += `<option value="${type.id}">${type.name}</option>`;
+      });
+    }
+  } catch (err) {
+    console.log('Error loading leave types');
+  }
+}
+
+async function loadLeaveBalance() {
+  const empId = localStorage.getItem('auth_emp_id');
+  if (!empId) return;
+
+  try {
+    const { data: types } = await supabaseClient
+      .from('leave_types')
+      .select('*')
+      .eq('is_active', true);
+
+    if (!types) return;
+
+    const { data: balances } = await supabaseClient
+      .from('employee_leave_balance')
+      .select('*')
+      .eq('emp_id', empId);
+
+    let html = '';
+    types.forEach(type => {
+      const balance = balances?.find(b => b.leave_type_id === type.id) || {balance: type.days_per_year, used: 0};
+      const remaining = balance.balance - balance.used;
+      const total = type.days_per_year;
+      const percent = total > 0 ? Math.round((remaining / total) * 100) : 0;
+
+      html += `
+        <div class="bal-card">
+          <div class="bal-type">${type.name}</div>
+          <div class="bal-count">${remaining} <span class="bal-total">/ ${total}</span></div>
+          <div class="bal-bar"><div class="bal-fill" style="width:${percent}%;background:${type.color}"></div></div>
+        </div>
+      `;
+    });
+
+    document.getElementById('leave-balance-container').innerHTML = html;
+  } catch (err) {
+    console.log('Error loading leave balance');
+  }
+}
+
+async function loadLeaveHistory() {
+  const empId = localStorage.getItem('auth_emp_id');
+  if (!empId) return;
+
+  try {
+    const { data } = await supabaseClient
+      .from('leave_requests')
+      .select(`id, leave_type_id, from_date, to_date, days, reason, status, created_at`)
+      .eq('emp_id', empId)
+      .order('created_at', { ascending: false })
+      .limit(10);
+
+    if (!data || data.length === 0) {
+      document.getElementById('leave-history-container').innerHTML =
+        '<div style="text-align:center;color:var(--muted);padding:20px;font-size:12px">No applications yet</div>';
+      return;
+    }
+
+    let html = '';
+    data.forEach(req => {
+      const startDate = new Date(req.from_date).toLocaleDateString('en-IN');
+      const endDate = new Date(req.to_date).toLocaleDateString('en-IN');
+      const statusColor = req.status === 'Approved' ? 'var(--green)' : req.status === 'Rejected' ? 'var(--red)' : 'var(--orange)';
+
+      html += `
+        <div class="log-item" style="margin-bottom:10px">
+          <div class="log-item-header" style="justify-content:space-between">
+            <div>
+              <div class="log-item-date">${req.days} days leave</div>
+              <div class="log-item-summary">${startDate} to ${endDate}</div>
+            </div>
+            <div style="font-size:11px;font-weight:600;color:${statusColor}">${req.status}</div>
+          </div>
+        </div>
+      `;
+    });
+
+    document.getElementById('leave-history-container').innerHTML = html;
+  } catch (err) {
+    console.log('Error loading history');
+  }
+}
+
+async function loadCompanyHolidays() {
+  try {
+    const { data } = await supabaseClient
+      .from('company_holidays')
+      .select('*')
+      .order('date', { ascending: true });
+
+    if (!data || data.length === 0) {
+      document.getElementById('holiday-list-container').innerHTML =
+        '<div style="text-align:center;color:var(--muted);font-size:12px">No holidays</div>';
+      return;
+    }
+
+    let html = '';
+    data.forEach(holiday => {
+      const date = new Date(holiday.date);
+      const day = date.toLocaleDateString('en-IN', {weekday: 'short'});
+      const dateStr = date.toLocaleDateString('en-IN', {month: 'short', day: 'numeric'});
+
+      html += `
+        <div style="background:var(--surface);border:1px solid rgba(0,102,255,0.1);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px">
+          <div style="display:flex;justify-content:space-between">
+            <div>
+              <div style="font-size:13px;font-weight:600;color:var(--text)">${holiday.holiday_name}</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:2px">${day}, ${dateStr}</div>
+            </div>
+          </div>
+        </div>
+      `;
+    });
+
+    document.getElementById('holiday-list-container').innerHTML = html;
+  } catch (err) {
+    console.log('Error loading holidays');
+  }
+}
+
 async function submitLeave() {
   const empId = localStorage.getItem('auth_emp_id');
-  const leaveType = document.getElementById('leave-type').value;
+  const leaveTypeId = document.getElementById('leave-type').value;
   const fromDate = document.getElementById('leave-from').value;
   const toDate = document.getElementById('leave-to').value;
   const reason = document.getElementById('leave-reason').value;
 
-  if (!leaveType || !fromDate) {
+  if (!leaveTypeId || !fromDate) {
     showToast('Fill all required fields');
     return;
   }
 
   try {
+    const from = new Date(fromDate);
+    const to = new Date(toDate || fromDate);
+    const days = Math.ceil((to - from) / (1000 * 60 * 60 * 24)) + 1;
+
     const { error } = await supabaseClient
       .from('leave_requests')
       .insert({
         emp_id: empId,
-        leave_type: leaveType,
+        leave_type_id: leaveTypeId,
         from_date: fromDate,
         to_date: toDate || fromDate,
+        days: days,
         reason: reason,
         status: 'Pending'
       });
@@ -2819,6 +3000,7 @@ async function submitLeave() {
     document.getElementById('leave-reason').value = '';
 
     showToast('Leave request submitted');
+    await loadLeaveBalance();
   } catch (err) {
     showToast('Error submitting leave');
     console.error(err);
@@ -2987,6 +3169,8 @@ window.addEventListener('load', async () => {
 
   await loadCompanySettings();
   await loadWorkSettings();
+  await loadLeaveTypes();
+  await loadLeaveBalance();
 
   const authEmpId = localStorage.getItem('auth_emp_id');
   if (authEmpId) {
