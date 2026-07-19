@@ -2092,7 +2092,7 @@ async function loadUserData() {
     STATE.user = data;
     updateUIWithUserData(data);
     loadAttendanceData();
-    loadCelebrations();
+    await loadCelebrations();
     await restoreClockState();
     // handleMissingClockOut();  // TODO: Fix RLS policy for this query
   } catch (err) {
