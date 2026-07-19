@@ -2277,12 +2277,19 @@ async function loadAttendanceData() {
       .gte('date', currentMonth + '-01');
 
     if (data) {
-      const stats = {present: 0, absent: 0, late: 0, leave: 0};
+      const dateMap = {};
       data.forEach(record => {
-        if (record.status === 'Present') stats.present++;
-        else if (record.status === 'Late') stats.late++;
-        else if (record.status === 'Absent') stats.absent++;
-        else if (record.status === 'Leave') stats.leave++;
+        if (record.date && !dateMap[record.date]) {
+          dateMap[record.date] = record.status || 'Present';
+        }
+      });
+
+      const stats = {present: 0, absent: 0, late: 0, leave: 0};
+      Object.values(dateMap).forEach(status => {
+        if (status === 'Present') stats.present++;
+        else if (status === 'Late') stats.late++;
+        else if (status === 'Absent') stats.absent++;
+        else if (status === 'Leave') stats.leave++;
       });
 
       document.getElementById('stat-present').textContent = stats.present;
@@ -2292,7 +2299,7 @@ async function loadAttendanceData() {
       document.getElementById('att-late').textContent = stats.late;
       document.getElementById('att-leave').textContent = stats.leave;
 
-      document.getElementById('stat-leave').textContent = Math.max(0, 12 - (data.length || 0));
+      document.getElementById('stat-leave').textContent = Math.max(0, 12 - Object.keys(dateMap).length);
 
       renderCalendar(data);
       renderAttendanceLogs(data);
