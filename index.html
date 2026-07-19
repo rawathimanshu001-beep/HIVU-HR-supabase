@@ -1867,6 +1867,37 @@ body.light-mode .leaflet-tile {
           </div>
         </div>
       </div>
+
+      <!-- WORK SETTINGS SECTION -->
+      <div class="profile-section-title">⚙️ Work Settings</div>
+      <div class="form-card" style="margin:12px 16px">
+        <div class="form-group">
+          <label class="form-label">Work Start Time</label>
+          <input type="time" class="form-input" id="set-work-start" value="09:00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Work End Time</label>
+          <input type="time" class="form-input" id="set-work-end" value="18:00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Min Hours Per Day</label>
+          <input type="number" class="form-input" id="set-min-hours" value="8" min="1" max="12">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Late After Time</label>
+          <input type="time" class="form-input" id="set-late-after" value="09:30">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Penalty Per Late Hour (₹)</label>
+          <input type="number" class="form-input" id="set-penalty" value="-100" step="10">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Short Day Threshold (Hours)</label>
+          <input type="number" class="form-input" id="set-short-day" value="6" min="1" max="12">
+        </div>
+        <button class="btn-submit" onclick="saveWorkSettings()">💾 Save Settings</button>
+      </div>
+
       <button class="btn-signout" onclick="signOut()"><i class="ti ti-logout"></i> Sign Out</button>
     </div>
 
@@ -2183,6 +2214,11 @@ function updateUIWithUserData(user) {
   document.getElementById('slip-name').textContent = user.name || '—';
   document.getElementById('slip-sub').textContent =
     `${user.emp_id} · ${user.designation || '—'}`;
+
+  // Load work settings when profile loads
+  if (STATE.currentPage === 'profile') {
+    await loadWorkSettings();
+  }
 }
 
 async function loadCelebrations() {
@@ -2414,6 +2450,32 @@ let leafletMap = null;
 let userMarker = null;
 let officeMarker = null;
 let radiusCircle = null;
+
+let COMPANY_SETTINGS = {
+  work_start_time: '09:00',
+  work_end_time: '18:00',
+  min_hours_per_day: 8,
+  late_after_time: '09:30',
+  penalty_per_late_hour: -100,
+  short_day_threshold: 6
+};
+
+async function loadCompanySettings() {
+  try {
+    const { data } = await supabaseClient
+      .from('company_settings')
+      .select('*')
+      .limit(1)
+      .single();
+
+    if (data) {
+      COMPANY_SETTINGS = data;
+      console.log('✓ Settings loaded:', COMPANY_SETTINGS);
+    }
+  } catch (err) {
+    console.log('Using default settings');
+  }
+}
 
 function initLeafletMap() {
   if (leafletMap) leafletMap.remove();
@@ -2666,6 +2728,7 @@ async function proceedClockOut() {
   const empId = localStorage.getItem('auth_emp_id');
   const hours = Math.floor((Date.now() - STATE.clockInTime) / 3600000);
   const mins = Math.floor(((Date.now() - STATE.clockInTime) % 3600000) / 60000);
+  const totalHours = hours + (mins / 60);
   const clockOutTimeStr = now.toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:true});
   const localDate = new Date(now.getTime() - (now.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
 
@@ -2673,7 +2736,7 @@ async function proceedClockOut() {
     const today = localDate;
     const { data: existing } = await supabaseClient
       .from('attendance_logs')
-      .select('id')
+      .select('id, clock_in_time')
       .eq('emp_id', empId)
       .eq('date', today)
       .order('created_at', { ascending: false })
@@ -2681,13 +2744,37 @@ async function proceedClockOut() {
       .single();
 
     if (existing) {
+      // Calculate status & penalty
+      let status = 'Present';
+      let penalty = 0;
+      let remarks = '';
+
+      // Check if late clock-in
+      const clockInTime = existing.clock_in_time;
+      if (clockInTime > COMPANY_SETTINGS.late_after_time) {
+        status = 'Late';
+        penalty = -500;
+        remarks = 'Late clock-in';
+      }
+
+      // Check if short day
+      if (totalHours < COMPANY_SETTINGS.short_day_threshold) {
+        status = 'Short Day';
+        const shortHours = COMPANY_SETTINGS.min_hours_per_day - totalHours;
+        penalty = Math.round(shortHours * COMPANY_SETTINGS.penalty_per_late_hour);
+        remarks = `Short by ${shortHours.toFixed(1)}h`;
+      }
+
       const { error } = await supabaseClient
         .from('attendance_logs')
         .update({
           clock_out_time: clockOutTimeStr,
           clock_out_lat: STATE.clockInCoords?.lat,
           clock_out_lng: STATE.clockInCoords?.lng,
-          hours_worked: `${hours}h ${mins}m`
+          hours_worked: `${hours}h ${mins}m`,
+          status: status,
+          penalty: penalty,
+          remarks: remarks
         })
         .eq('id', existing.id);
 
@@ -2811,6 +2898,73 @@ function showToast(msg) {
   setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
+async function loadWorkSettings() {
+  try {
+    const { data } = await supabaseClient
+      .from('company_settings')
+      .select('*')
+      .limit(1)
+      .single();
+
+    if (data) {
+      document.getElementById('set-work-start').value = data.work_start_time || '09:00';
+      document.getElementById('set-work-end').value = data.work_end_time || '18:00';
+      document.getElementById('set-min-hours').value = data.min_hours_per_day || 8;
+      document.getElementById('set-late-after').value = data.late_after_time || '09:30';
+      document.getElementById('set-penalty').value = data.penalty_per_late_hour || -100;
+      document.getElementById('set-short-day').value = data.short_day_threshold || 6;
+    }
+  } catch (err) {
+    console.log('Could not load settings');
+  }
+}
+
+async function saveWorkSettings() {
+  const workStart = document.getElementById('set-work-start').value;
+  const workEnd = document.getElementById('set-work-end').value;
+  const minHours = parseInt(document.getElementById('set-min-hours').value);
+  const lateAfter = document.getElementById('set-late-after').value;
+  const penalty = parseInt(document.getElementById('set-penalty').value);
+  const shortDay = parseInt(document.getElementById('set-short-day').value);
+
+  if (!workStart || !workEnd || !lateAfter) {
+    showToast('Please fill all fields');
+    return;
+  }
+
+  try {
+    const { error } = await supabaseClient
+      .from('company_settings')
+      .update({
+        work_start_time: workStart,
+        work_end_time: workEnd,
+        min_hours_per_day: minHours,
+        late_after_time: lateAfter,
+        penalty_per_late_hour: penalty,
+        short_day_threshold: shortDay,
+        updated_at: new Date()
+      })
+      .eq('id', (await supabaseClient.from('company_settings').select('id').limit(1).single()).data.id);
+
+    if (error) throw error;
+
+    // Update global settings
+    COMPANY_SETTINGS = {
+      work_start_time: workStart,
+      work_end_time: workEnd,
+      min_hours_per_day: minHours,
+      late_after_time: lateAfter,
+      penalty_per_late_hour: penalty,
+      short_day_threshold: shortDay
+    };
+
+    showToast('✅ Settings saved successfully!');
+  } catch (err) {
+    showToast('Failed to save settings');
+    console.error(err);
+  }
+}
+
 async function uploadProfilePhoto(event) {
   const file = event.target.files[0];
   if (!file) return;
@@ -2853,6 +3007,9 @@ function signOut() {
 
 window.addEventListener('load', async () => {
   if (!await initSupabase()) return;
+
+  await loadCompanySettings();
+  await loadWorkSettings();
 
   const authEmpId = localStorage.getItem('auth_emp_id');
   if (authEmpId) {
